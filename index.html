@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0f16">
+<title>FairBike | Value-first bike comparator</title>
+<style>
+:root{
+  --bg:#070b11;--bg2:#0b1119;--panel:#0e1621;--panel2:#101a27;--panel3:#0a1119;
+  --line:#1f2d3d;--line2:#293a4d;--text:#eef5f8;--muted:#94a5b6;--faint:#667689;
+  --cyan:#69e6f0;--green:#72eda4;--yellow:#f8cf63;--red:#ff8e91;--shadow:0 18px 60px rgba(0,0,0,.28);
+  --r:22px
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+ radial-gradient(900px 500px at 0% -10%,rgba(73,117,150,.25),transparent 62%),
+ radial-gradient(700px 500px at 100% 5%,rgba(57,104,105,.16),transparent 68%),
+ linear-gradient(180deg,var(--bg2),var(--bg));
+ color:var(--text);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
+.shell{max-width:1380px;margin:0 auto;padding:26px 20px 58px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px}
+.brandmark{display:flex;align-items:center;gap:11px;font-weight:850;letter-spacing:-.02em}.mark{width:34px;height:34px;border-radius:11px;border:1px solid #2c5462;background:linear-gradient(145deg,#132634,#0c171f);display:grid;place-items:center;color:var(--cyan);box-shadow:0 8px 26px rgba(105,230,240,.12)}
+.nav-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line2);background:#0b131c;color:#dbe6ed;border-radius:12px;padding:9px 12px;font-weight:700}.btn:hover{border-color:#406174;background:#101b26}.btn.primary{background:#d9fdff;color:#071017;border-color:#d9fdff}.btn.ghost{background:transparent}.btn.small{font-size:12px;padding:7px 9px}
+.hero{display:grid;grid-template-columns:1.45fr .85fr;gap:20px;align-items:end;margin-bottom:20px}
+.kicker{font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:clamp(36px,5vw,68px);letter-spacing:-.055em;line-height:.98;margin:9px 0 14px;max-width:900px}.hero p{max-width:850px;color:#a9b8c5;font-size:16px;margin:0}.hero-note{background:rgba(105,230,240,.06);border:1px solid rgba(105,230,240,.17);border-radius:18px;padding:15px 16px;color:#bfd0db}.hero-note strong{color:#eaf8fb}
+.panel{background:linear-gradient(180deg,rgba(15,24,35,.96),rgba(9,15,23,.98));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.toolbar{padding:15px;display:grid;grid-template-columns:minmax(250px,1fr) auto auto auto;gap:10px;align-items:center;position:sticky;top:10px;z-index:5;backdrop-filter:blur(12px)}
+.search{position:relative}.search input,.field input,.field select{width:100%;background:#09111a;border:1px solid var(--line2);color:var(--text);border-radius:13px;padding:12px 13px;outline:none}.search input:focus,.field input:focus,.field select:focus{border-color:#4c7f90;box-shadow:0 0 0 3px rgba(105,230,240,.07)}
+.quick{display:flex;gap:8px;align-items:center}.chip{padding:8px 10px;border:1px solid var(--line);border-radius:999px;background:#09111a;color:#9eb0c0;font-size:12px;font-weight:700}.chip.active{border-color:#396a76;background:rgba(105,230,240,.08);color:#d9fbff}
+.controls{display:grid;grid-template-columns:1.15fr 1.15fr .75fr .75fr .75fr .9fr;gap:10px;margin-top:12px}.field label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin:0 0 6px 2px}.field .hint{color:var(--faint);font-size:11px;margin-top:5px}
+.catalog-line{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:11px;color:#738697;font-size:12px}.catalog-line b{color:#cde7ef}
+.loading{color:var(--yellow)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.bike-card{overflow:hidden}.bike-media{height:255px;position:relative;background:radial-gradient(circle at 50% 50%,#16212d,#080d13 72%);overflow:hidden}.bike-media img{width:100%;height:100%;object-fit:cover;display:block;opacity:.94}.bike-media:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(3,7,10,.95) 100%)}.media-label{position:absolute;left:16px;top:14px;z-index:2;display:flex;gap:7px;flex-wrap:wrap}.tag{display:inline-flex;align-items:center;gap:5px;border:1px solid #2a3948;background:rgba(7,13,19,.78);padding:5px 8px;border-radius:999px;color:#b9c9d4;font-size:10px;font-weight:800;backdrop-filter:blur(8px)}.tag.good{border-color:rgba(114,237,164,.28);color:#a8f4c4}.media-refresh{cursor:pointer;font:inherit;background:rgba(7,13,19,.78)}.media-refresh:hover{border-color:#4c7f90;color:#e7fbfe}.tag.warn{border-color:rgba(248,207,99,.27);color:#f3d77d}.tag.muted{color:#90a2b2}
+.media-title{position:absolute;left:17px;bottom:15px;right:17px;z-index:2}.brand{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#a8b9c5}.bike-name{font-size:29px;font-weight:900;letter-spacing:-.035em;line-height:1.05;margin-top:2px}.variant{color:#acbbc7;font-size:12px;margin-top:5px}
+.card-body{padding:16px}.price-row{display:flex;justify-content:space-between;gap:10px;align-items:end}.price{font-size:30px;font-weight:900;letter-spacing:-.04em}.price small{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0}.value-badge{text-align:right}.value-badge span{display:block;color:var(--faint);font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.value-badge b{display:block;font-size:19px;color:var(--green)}
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}.stat{background:var(--panel3);border:1px solid #192737;border-radius:14px;padding:10px}.stat b{display:block;font-size:16px}.stat small{display:block;color:#768a9d;font-size:10px;margin-top:3px}
+.score-block{margin-top:16px}.score-line{display:flex;justify-content:space-between;gap:10px;font-size:12px}.score-line .muted{color:var(--muted)}.meter{height:9px;border-radius:99px;background:#081019;border:1px solid #182634;overflow:hidden;margin-top:7px}.meter>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#3ebacb,#72eda4)}
+.mini-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:11px}.mini{border:1px solid #1a2938;background:#0a121b;padding:8px;border-radius:11px}.mini b{font-size:12px}.mini span{display:block;color:#6f8396;font-size:9px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.card-footer{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px;padding-top:13px;border-top:1px solid #172536}.sources{display:flex;gap:10px;flex-wrap:wrap}.sources a{font-size:11px}.score-rank{font-size:11px;color:#a5b7c4}.rank-star{color:var(--green)}
+.section{margin-top:18px}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:10px}.section-head h2{margin:0;font-size:21px;letter-spacing:-.025em}.section-head p{margin:2px 0 0;color:var(--muted);font-size:12px}.split{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:680px}.table th,.table td{padding:13px 12px;border-bottom:1px solid #1b2837}.table th{color:#8fa1b1;font-size:10px;text-transform:uppercase;letter-spacing:.08em;text-align:left}.table td:nth-child(2),.table td:nth-child(3){text-align:right}.win{color:var(--green);font-weight:800}.lose{color:#9cacba}.note{font-size:10px;color:#687b8c}
+.weights{padding:15px}.weight-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.weight{background:#0a121b;border:1px solid #1b2a39;border-radius:14px;padding:11px}.weight-top{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:12px}.weight input{width:100%;accent-color:var(--cyan);margin:9px 0 0}.weight small{display:block;color:#6f8191;font-size:10px}
+.insights{display:grid;grid-template-columns:1fr 1fr;gap:16px}.insight{padding:17px}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:900}.insight h3{margin:5px 0 6px;font-size:19px;letter-spacing:-.02em}.insight p{color:#9cafbf;margin:0}.callout{margin-top:12px;border:1px solid rgba(105,230,240,.22);background:rgba(105,230,240,.055);border-radius:15px;padding:12px 13px;color:#c8e1e8}.callout.good{border-color:rgba(114,237,164,.23);background:rgba(114,237,164,.055)}.callout.warn{border-color:rgba(248,207,99,.25);background:rgba(248,207,99,.06)}
+.alternatives{padding:17px}.alt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.alt{background:#0a121b;border:1px solid #1a2838;border-radius:14px;padding:12px}.alt-top{display:flex;justify-content:space-between;gap:8px}.alt h4{margin:0;font-size:14px}.alt small{color:#6f8191}.alt p{margin:8px 0 0;color:#99acbb;font-size:12px}.alt b{color:#cdebf0}
+.method{padding:19px}.formula{background:#070d14;border:1px solid #1c2b3a;border-radius:13px;padding:12px 13px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d7e5ea}.formula b{color:var(--cyan)}.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:13px}.method p{color:#8fa1b0;margin:8px 0}.bullet{padding-left:18px;color:#8fa1b0}.bullet li{margin:6px 0}.foot{color:#5e7182;font-size:10px;margin-top:16px;border-top:1px solid #162433;padding-top:13px}
+.empty{padding:38px;text-align:center;color:#8092a3}.toast{position:fixed;right:18px;bottom:18px;background:#101a24;border:1px solid #2a3c4e;color:#e8f5f8;border-radius:13px;padding:11px 13px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);pointer-events:none;transition:.22s;z-index:20}.toast.show{opacity:1;transform:none}
+.modal{position:fixed;inset:0;background:rgba(1,4,7,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal.open{display:flex}.modal-card{max-width:650px;width:100%;background:#0d1620;border:1px solid #294052;border-radius:20px;box-shadow:var(--shadow);overflow:hidden}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:15px 17px;border-bottom:1px solid #1b2a39}.modal-head h3{margin:0}.modal-body{padding:17px}.modal-body input{width:100%;background:#09111a;border:1px solid #2a3b4b;color:#eaf3f7;padding:12px;border-radius:12px}
+@media(max-width:1100px){.hero{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar .search{grid-column:1/-1}.controls{grid-template-columns:1fr 1fr}.split,.insights,.method-grid{grid-template-columns:1fr}.alt-grid{grid-template-columns:1fr 1fr}.weight-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.shell{padding:16px 12px 42px}.topbar{align-items:flex-start}.nav-actions .hide-mob{display:none}.toolbar{position:static;grid-template-columns:1fr 1fr}.compare-grid{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}.mini-breakdown{grid-template-columns:1fr 1fr}.alt-grid,.weight-grid{grid-template-columns:1fr}.hero-note{margin-top:3px}.bike-media{height:220px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brandmark"><div class="mark">↗</div><span>FairBike</span></div>
+    <div class="nav-actions">
+      <button class="btn small ghost hide-mob" id="resetBtn">Reset</button>
+      <button class="btn small" id="shareBtn">Share comparison</button>
+      <button class="btn small primary" id="importBtn">Import CSV</button>
+      <input id="catalogFile" type="file" accept=".csv,text/csv" hidden>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div>
+      <div class="kicker">Value density · transparent inputs · no badge bias</div>
+      <h1>Buy the bike that earns its price tag.</h1>
+      <p>FairBike separates capability from cost, then asks the more useful question: how much measurable utility do you get for each rupee you spend?</p>
+    </div>
+    <div class="hero-note"><strong>Designed for comparison, not persuasion.</strong><br>Weights are user-controlled, the formula stays visible, missing data is flagged, and premium pricing never creates bonus points by itself.</div>
+  </section>
+
+  <section class="panel toolbar">
+    <div class="search"><input id="globalSearch" placeholder="Search the catalog: brand, model, type…" autocomplete="off"></div>
+    <button class="btn" id="swapBtn">Swap bikes</button>
+    <button class="btn" id="copyBtn">Copy verdict</button>
+    <div class="quick"><span class="chip active" data-filter="all">All</span><span class="chip" data-filter="electric">EV</span><span class="chip" data-filter="petrol">Petrol</span></div>
+  </section>
+
+  <section class="panel" style="padding:14px;margin-top:12px">
+    <div class="controls">
+      <div class="field"><label>Bike A</label><input id="bikeA" list="bikeChoices" placeholder="Search bike A…"><div class="hint" id="bikeAHint"></div></div>
+      <div class="field"><label>Bike B</label><input id="bikeB" list="bikeChoices" placeholder="Search bike B…"><div class="hint" id="bikeBHint"></div></div>
+      <div class="field"><label>Budget ceiling</label><select id="budget"><option value="0">No ceiling</option><option value="100000">₹1.0L</option><option value="150000">₹1.5L</option><option value="200000">₹2.0L</option><option value="250000">₹2.5L</option><option value="300000">₹3.0L</option><option value="400000">₹4.0L</option><option value="600000">₹6.0L</option></select></div>
+      <div class="field"><label>Category</label><select id="category"><option value="all">All types</option><option value="electric">Electric</option><option value="motorcycle">Motorcycles</option><option value="scooter">Scooters</option></select></div>
+      <div class="field"><label>Catalog order</label><select id="sort"><option value="value">Value density</option><option value="priceLow">Price: low → high</option><option value="priceHigh">Price: high → low</option><option value="power">Power</option><option value="range">Range / mileage</option></select></div><div class="field"><label>Catalogue coverage</label><select id="freshness"><option value="all">All India catalogue</option><option value="current">Current / verified only</option></select></div>
+    </div>
+    <div class="catalog-line"><span id="catalogStatus" class="loading">Loading catalog…</span><span id="catalogCount"></span></div><div class="catalog-line"><span id="dataAsOf">India catalogue checked: 23 Aug 2026</span><span>Current records are shown alongside older records for maximum coverage; every older row is clearly marked.</span></div>
+    <datalist id="bikeChoices"></datalist>
+  </section>
+
+  <section class="compare-grid" id="bikes"></section>
+
+  <section class="section split">
+    <div class="panel" style="padding:17px">
+      <div class="section-head"><div><h2>Where the money goes</h2><p>Every visible point comes from a measurable category.</p></div><span class="tag">No brand score</span></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Metric</th><th id="thA">Bike A</th><th id="thB">Bike B</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+    </div>
+    <div class="panel alternatives">
+      <div class="section-head"><div><h2>Useful alternatives</h2><p>Nearby options that could make more sense for the same money.</p></div></div>
+      <div class="alt-grid" id="alternativeGrid"></div>
+    </div>
+  </section>
+
+  <section class="section panel weights">
+    <div class="section-head"><div><h2>Set your priorities</h2><p>The model responds instantly. The total is always normalized to 100%.</p></div><button class="btn small" id="saveWeights">Save priorities</button></div>
+    <div class="weight-grid" id="weights"></div>
+  </section>
+
+  <section class="section insights">
+    <div class="panel insight">
+      <div class="eyebrow">Verdict</div><h3 id="suggestionTitle">Verdict</h3><p id="suggestionText"></p><div class="callout" id="suggestionBox"></div>
+    </div>
+    <div class="panel insight">
+      <div class="eyebrow">Data confidence</div><h3 id="confidenceTitle">Confidence</h3><p id="contextText"></p><div class="callout" id="confidenceBox"></div>
+    </div>
+  </section>
+
+  <section class="section panel method">
+    <div class="eyebrow">Method</div><h2 style="margin:4px 0 8px">Transparent value formula</h2>
+    <div class="formula"><b>Utility</b> = Σ(weight × normalized feature score)<br><b>Value density</b> = Utility score ÷ price in ₹ lakh<br><b>Premium test</b> = extra utility ÷ extra money spent</div>
+    <div class="method-grid"><div><p>Benchmarks are broad caps, not opponent-relative scores. This avoids manufacturing a winner by moving the goalposts whenever you change bikes.</p><ul class="bullet"><li>Performance combines top speed, peak power and acceleration when available.</li><li>Range uses claimed EV range or mileage for combustion bikes.</li><li>Charging rewards faster 0–80% charging when a source provides it.</li><li>Safety rewards ABS coverage and traction control where recorded.</li><li>Maintenance rewards lower routine ownership cost; when no credible annual-cost figure is available, the score stays neutral and the gap is shown as missing data.</li></ul></div><div><p id="sourceList"></p><p class="foot">Important: claimed range is not real-world range. Prices can vary by city, variant, offers and registration costs. Current prices below are the latest figures verified for this build on 23 Aug 2026; limited-time offers are not silently treated as permanent prices. Older catalog rows are visibly marked instead of masquerading as current prices. Images are for identification, not endorsement.</p></div></div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal" id="shareModal"><div class="modal-card"><div class="modal-head"><h3>Share this comparison</h3><button class="btn small" id="closeShare">Close</button></div><div class="modal-body"><p style="color:#91a4b4;margin-top:0">This link encodes the two bikes and your weights in the URL.</p><input id="shareUrl" readonly></div></div></div>
+<script>
+const CATALOG_URL='https://gist.githubusercontent.com/anvesh2129/fd41c8b9e4ac2be354714cbdef9317f0/raw/bikes_ind.csv';
+const CATALOG_PAGE='https://gist.github.com/anvesh2129/fd41c8b9e4ac2be354714cbdef9317f0';
+const curated=[
+{id:'ola-roadster-x-plus-9-1',brand:'Ola Electric',name:'Roadster X+',variant:'9.1 kWh',type:'Electric motorcycle',price:189999,power:11,top:125,accel:2.7,range:500,charge80:8,abs:1,traction:0,battery:'9.1 kWh',maintenanceAnnual:1600,maintenanceNote:'Routine service baseline: ₹799 + GST service charge; annual figure is a conservative routine-care estimate.',fresh:'2026-08',verified:'23 Aug 2026',imageUrl:'',sources:[['Ola official','https://www.olaelectric.com/motorcycles/roadster-x'],['Ola service','https://www.olaelectric.com/hyper-service'],['BikeWale price update','https://www.bikewale.com/news/ola-roadster-x-plus-price-reduced-by-rs-60000/']]},
+{id:'oben-rorr-ez-4-4',brand:'Oben Electric',name:'Rorr EZ',variant:'4.4 kWh',type:'Electric motorcycle',price:110625,power:7.5,top:95,accel:3.3,range:175,charge80:0.75,abs:1,traction:0,battery:'4.4 kWh',maintenanceAnnual:3500,maintenanceNote:'Estimated annual post-warranty repair/maintenance spend; routine service may be lower.',fresh:'2026-08',verified:'23 Aug 2026',sources:[['BikeWale current price','https://www.bikewale.com/oben-bikes/rorr-ez//'],['BikeCostCalc maintenance estimate','https://bikecostcalculator.com/bikes/oben-rorr-ez-sigma'],['BikeDekho current reviews','https://www.bikedekho.com/oben/rorr-ez']]},
+{id:'uv-f77-mach-2-original',brand:'Ultraviolette',name:'F77 Mach 2',variant:'Original',type:'Electric motorcycle',price:309000,power:27,top:155,accel:2.9,range:211,charge80:3,abs:2,traction:1,battery:'7.1 kWh',maintenanceAnnual:5000,maintenanceNote:'Current third-party 2026 estimate; actual spend varies with wear parts and city.',fresh:'2026-08',verified:'23 Aug 2026',sources:[['Ultraviolette','https://www.ultraviolette.com/f77'],['BikeWale current price/specs','https://www.bikewale.com/ultraviolette-bikes/f77-mach-2/'],['2026 maintenance estimate','https://www.allaboutevs.com/blog/ultraviolette-f77-maintenance-cost']]},
+{id:'ather-450-apex',brand:'Ather Energy',name:'450 Apex',variant:'Standard',type:'Electric scooter',price:195999,power:7,top:100,accel:2.9,range:165,charge80:5.15,abs:1,traction:0,battery:'3.5 kWh',maintenanceAnnual:1593,maintenanceNote:'Annual Ather Care baseline inferred from the published plan structure; plan pricing varies by city and plan.',fresh:'2026-08',verified:'23 Aug 2026',sources:[['BikeWale Aug 2026 price/specs','https://www.bikewale.com/ather-bikes/450-apex/'],['Ather maintenance','https://www.atherenergy.com/blog/ather-scooter-service-cost-india'],['Ather Care FAQ','https://www.atherenergy.com/faq/vehicle/ather-care']]}
+]
+const bikes=[];const imgCache=new Map();const imgMeta=new Map();
+const state={A:null,B:null,filter:'all',search:'',budget:0,category:'all',sort:'value',freshness:'all'};
+let weights=JSON.parse(localStorage.getItem('fairbike.weights')||'null')||{performance:20,range:25,charging:15,safety:15,maintenance:25};
+const caps={top:190,power:45,range:520,charge80:.5,maintenance:6000};
+const $=id=>document.getElementById(id);
+const money=x=>'₹'+(x/100000).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})+'L';
+const shortMoney=x=>'₹'+(x/100000).toLocaleString('en-IN',{maximumFractionDigits:2})+'L';
+const clamp=(x,min=0,max=1)=>Math.max(min,Math.min(max,x));
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(window._toast);window._toast=setTimeout(()=>t.classList.remove('show'),2200)};
+function csvRows(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell='';continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x!==''))rows.push(row);row=[];continue}cell+=c}if(cell!==''||row.length){row.push(cell);rows.push(row)}return rows}
+const norm=s=>String(s??'').replace(/\s+/g,' ').trim();
+function rowToBike(row,h,i){const idx=k=>h.indexOf(k), num=k=>parseFloat(String(row[idx(k)]??'').replace(/[^0-9.\-]/g,''));const name=norm(row[idx('name')]),brand=norm(row[idx('brand')]);if(!name||!brand||!Number.isFinite(num('price'))||num('price')<=0)return null;const brake=(row[idx('braking system')]||'').toLowerCase(),trans=(row[idx('transmission')]||'').toLowerCase(),electric=/electric|ev|battery/i.test(name+' '+brand+' '+trans),mileage=num('mileage - owner reported')||num('mileage - arai');return{id:`csv-${i}-${brand}-${name}`.toLowerCase().replace(/[^a-z0-9]+/g,'-'),brand,name,variant:'Catalog record',type:electric?'Electric / unknown variant':'Motorcycle / scooter',price:num('price'),power:num('max power'),top:num('top speed'),accel:null,range:null,charge80:null,abs:/abs/.test(brake)?(/dual/.test(brake)?2:1):0,traction:0,mileage,engine:num('displacement'),weight:num('kerb weight'),seat:num('seat height'),ground:num('ground clearance'),fuel:num('fuel tank capacity'),maintenanceAnnual:null,maintenanceNote:'No current routine-maintenance cost supplied in the historical catalog.',fresh:'2023 dataset',stale:true,verified:'2023',sources:[['Open India dataset',CATALOG_PAGE]]};}
+function mergeCurated(){const keys=new Set(bikes.map(b=>`${b.brand}|${b.name}`.toLowerCase()));for(const c of curated)if(!keys.has(`${c.brand}|${c.name}`.toLowerCase()))bikes.unshift(c)}
+function featureScores(b){const perfTop=Number.isFinite(b.top)?clamp(b.top/caps.top):.35,perfPower=Number.isFinite(b.power)?clamp(b.power/caps.power):.35,perfAccel=Number.isFinite(b.accel)?clamp(3.5/Math.max(b.accel,.1)):.35;const performance=100*(.35*perfTop+.35*perfPower+.30*perfAccel);const range=Number.isFinite(b.range)?100*clamp(b.range/caps.range):(Number.isFinite(b.mileage)?100*clamp(b.mileage/80):40);const charging=Number.isFinite(b.charge80)?100*clamp(caps.charge80/Math.max(b.charge80,.1)):50;const safety=100*(.65*clamp((b.abs||0)/2)+.35*(b.traction?1:0));const maintenance=Number.isFinite(b.maintenanceAnnual)?100*(1-clamp(b.maintenanceAnnual/caps.maintenance)) : 50;return{performance,range,charging,safety,maintenance}}
+function utility(b){const s=featureScores(b);return Object.keys(weights).reduce((v,k)=>v+s[k]*weights[k]/100,0)}
+function density(b){return utility(b)/(b.price/100000)}
+function completeness(b){const keys=['price','top','power','abs'];if(b.type.startsWith('Electric'))keys.push('range','charge80');else keys.push('mileage');keys.push('maintenanceAnnual');const have=keys.filter(k=>Number.isFinite(b[k])).length;return Math.round(have/keys.length*100)}
+function electric(b){return /electric|ev/i.test(b.type+' '+b.brand+' '+b.name)}
+function filterBikes(){let arr=bikes.slice();if(state.freshness==='current')arr=arr.filter(b=>!b.stale);if(state.search){const q=state.search.toLowerCase();arr=arr.filter(b=>`${b.brand} ${b.name} ${b.variant} ${b.type}`.toLowerCase().includes(q))}if(state.filter!=='all')arr=arr.filter(b=>state.filter==='electric'?electric(b):!electric(b));if(state.category!=='all')arr=arr.filter(b=>state.category==='electric'?electric(b):state.category==='motorcycle'?/motorcycle/i.test(b.type):/scooter/i.test(b.type));if(+state.budget)arr=arr.filter(b=>b.price<=+state.budget);const cmp=(a,b)=>b-a;arr.sort((a,b)=>{if(state.sort==='priceLow')return a.price-b.price;if(state.sort==='priceHigh')return b.price-a.price;if(state.sort==='power')return (b.power||0)-(a.power||0);if(state.sort==='range')return ((b.range||b.mileage||0)-(a.range||a.mileage||0));if(a.stale!==b.stale)return a.stale?1:-1;return cmp(density(a),density(b))});return arr}
+function fillDatalist(){const list=$('bikeChoices');list.innerHTML='';for(const b of filterBikes().slice(0,1200)){const o=document.createElement('option');o.value=`${b.brand} ${b.name} · ${b.variant}`;list.appendChild(o)}}
+function setBike(side,id){if(id&&bikes.some(b=>b.id===id)){state[side]=id;render()}}
+function setupBikeInput(side){const el=$('bike'+side);el.addEventListener('change',()=>{const v=el.value.toLowerCase();const found=bikes.find(b=>`${b.brand} ${b.name} · ${b.variant}`.toLowerCase()===v)||bikes.find(b=>`${b.brand} ${b.name}`.toLowerCase()===v);if(found)setBike(side,found.id)});el.addEventListener('input',()=>{const q=el.value.toLowerCase();const exact=bikes.find(b=>`${b.brand} ${b.name} · ${b.variant}`.toLowerCase()===q);if(exact)setBike(side,exact.id)})}
+function placeholderData(b){
+  const label=`${b.brand} ${b.name}`.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const initials=(b.brand+' '+b.name).split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').toUpperCase();
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#172735"/><stop offset="1" stop-color="#070d13"/></linearGradient></defs><rect width="1200" height="720" fill="url(#g)"/><circle cx="600" cy="355" r="170" fill="none" stroke="#315063" stroke-width="3" opacity=".55"/><path d="M360 500h480" stroke="#284251" stroke-width="3"/><text x="600" y="335" fill="#69e6f0" font-family="Arial,sans-serif" font-size="92" font-weight="800" text-anchor="middle">${initials}</text><text x="600" y="410" fill="#c6d6de" font-family="Arial,sans-serif" font-size="28" text-anchor="middle">${label}</text><text x="600" y="555" fill="#72899a" font-family="Arial,sans-serif" font-size="20" text-anchor="middle">Image unavailable • data still comparable</text></svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+}
+function imageTokens(b){return `${b.brand} ${b.name}`.toLowerCase().split(/[^a-z0-9]+/).filter(x=>x.length>2)}
+function relevance(title,b){const toks=imageTokens(b);const t=String(title||'').toLowerCase();const hits=toks.filter(x=>t.includes(x));return hits.length>=Math.min(2,toks.length)}
+async function imageFor(b,img,force=false){
+  if(!img)return;
+  if(!force && imgCache.has(b.id)){img.src=imgCache.get(b.id);img.dataset.ready='1';img.alt=`${b.brand} ${b.name}`;return}
+  const direct=(b.imageUrl||'').trim();
+  const useDirect=/^https?:\/\/.+\.(?:jpg|jpeg|png|webp|avif)(?:\?.*)?$/i.test(direct);
+  const tryUrl=async (u,source,title)=>new Promise(resolve=>{
+    const probe=new Image(); probe.referrerPolicy='no-referrer'; probe.onload=()=>{imgCache.set(b.id,u);imgMeta.set(b.id,{source,title,url:u});img.src=u;img.dataset.ready='1';resolve(true)};probe.onerror=()=>resolve(false);probe.src=u;
+  });
+  if(useDirect && await tryUrl(direct,'provided','Provided image'))return;
+
+  // Opening index.html directly as file:// is supported. Browsers intentionally
+  // block many cross-origin requests from local files, so image discovery stays
+  // offline in that mode and the UI uses its deterministic placeholder.
+  const offline=location.protocol==='file:';
+  if(!offline){
+    try{
+      const q=encodeURIComponent(`${b.brand} ${b.name} motorcycle`);
+      const api=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${q}&gsrlimit=12&prop=imageinfo&iiprop=url&iiurlwidth=1200&format=json&origin=*`;
+      const r=await fetch(api);if(r.ok){const j=await r.json();const pages=Object.values(j?.query?.pages||{}).sort((a,b)=>Number(a.index||999)-Number(b.index||999));
+        for(const page of pages){const title=page?.title||'';const ii=page?.imageinfo?.[0];const u=ii?.thumburl||ii?.url;if(!u||!relevance(title,b)||/logo|icon|helmet|parts|engine|tyre|wheel/i.test(title))continue;if(await tryUrl(u,'Wikimedia Commons',title))return;}
+      }
+    }catch(e){}
+    try{
+      const title=encodeURIComponent(`${b.brand} ${b.name}`);const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);if(r.ok){const j=await r.json(),u=j?.thumbnail?.source;if(u&&await tryUrl(u,'Wikipedia',j?.title||'Wikipedia thumbnail'))return;}
+    }catch(e){}
+  }
+  const fallback=placeholderData(b);imgCache.set(b.id,fallback);imgMeta.set(b.id,{source:offline?'Offline fallback':'FairBike fallback',title:'Generated placeholder',url:fallback});img.src=fallback;img.dataset.ready='1';
+}
+
+function card(b,side,other){
+ const u=utility(b),d=density(b),conf=completeness(b),s=featureScores(b),imgId=`img${side}`;
+ setTimeout(()=>imageFor(b,$(imgId)),0);
+ const freshness=b.stale?'<span class="tag warn">⚠ 2023 baseline</span>':'<span class="tag good">✓ verified Aug 2026</span>';
+ const win=d>=density(other);
+ return `<article class="panel bike-card"><div class="bike-media"><img id="${imgId}" alt="${b.brand} ${b.name}" loading="lazy" decoding="async"><div class="media-label"><span class="tag">BIKE ${side}</span>${freshness}<span class="tag">${conf}% data coverage</span><button class="tag media-refresh" type="button" data-img-retry="${b.id}" data-side="${side}" title="Find another image">↻ image</button></div><div class="media-title"><div class="brand">${b.brand}</div><div class="bike-name">${b.name}</div><div class="variant">${b.variant} · ${b.type}</div></div></div><div class="card-body"><div class="price-row"><div><div class="price">${money(b.price)} <small>listed / base</small></div></div><div class="value-badge"><span>Value density</span><b>${d.toFixed(1)} / ₹L</b></div></div><div class="stat-grid"><div class="stat"><b>${Number.isFinite(b.range)?b.range+' km':(Number.isFinite(b.mileage)?b.mileage+' km/l':'—')}</b><small>${electric(b)?'claimed range':'mileage'}</small></div><div class="stat"><b>${Number.isFinite(b.top)?b.top+' km/h':'—'}</b><small>top speed</small></div><div class="stat"><b>${Number.isFinite(b.power)?b.power+' kW':'—'}</b><small>peak power</small></div><div class="stat"><b>${Number.isFinite(b.accel)?b.accel+' s':'—'}</b><small>0–40 / accel</small></div><div class="stat"><b>${Number.isFinite(b.maintenanceAnnual)?shortMoney(b.maintenanceAnnual)+'/yr':'—'}</b><small>maintenance</small></div></div><div class="score-block"><div class="score-line"><span class="muted">Weighted utility</span><strong>${u.toFixed(1)} / 100</strong></div><div class="meter"><span style="width:${u}%"></span></div><div class="mini-breakdown">${Object.entries(s).map(([k,v])=>`<div class="mini"><span>${k}</span><b>${v.toFixed(0)}</b></div>`).join('')}</div></div><div class="card-footer"><div class="sources">${(b.sources||[]).map(s=>`<a href="${s[1]}" target="_blank" rel="noreferrer">${s[0]} ↗</a>`).join('')}</div><div class="score-rank">${win?'<span class="rank-star">●</span> better value':'secondary'}</div></div></div></article>`
+}
+
+function normalizeWeights(){const keys=['performance','range','charging','safety','maintenance'];for(const k of keys)if(!Number.isFinite(weights[k]))weights[k]=0;let total=Object.values(weights).reduce((a,b)=>a+b,0);if(total===0){weights={performance:20,range:25,charging:15,safety:15,maintenance:25};return}for(const k in weights)weights[k]=Math.round(weights[k]/total*100);let diff=100-Object.values(weights).reduce((a,b)=>a+b,0);weights.performance+=diff}
+function renderWeights(){const desc={performance:'Speed, power and acceleration',range:'Distance or fuel efficiency',charging:'EV charge convenience',safety:'ABS and traction hardware',maintenance:'Routine ownership and service cost'};$('weights').innerHTML=Object.entries(weights).map(([k,v])=>`<div class="weight"><div class="weight-top"><span>${k[0].toUpperCase()+k.slice(1)}</span><span>${v}%</span></div><input type="range" min="0" max="50" step="5" value="${v}" data-k="${k}"><small>${desc[k]}</small></div>`).join('');document.querySelectorAll('.weight input').forEach(i=>i.oninput=e=>{weights[e.target.dataset.k]=+e.target.value;normalizeWeights();renderFast()})}
+function renderTable(a,b){const sa=featureScores(a),sb=featureScores(b),rows=[['Price',money(a.price),money(b.price),a.price<=b.price?'A':'B','Lower is better'],['Utility score',utility(a).toFixed(1),utility(b).toFixed(1),utility(a)>=utility(b)?'A':'B','Higher is better'],['Value density',density(a).toFixed(1),density(b).toFixed(1),density(a)>=density(b)?'A':'B','Higher is better'],['Performance',sa.performance.toFixed(1),sb.performance.toFixed(1),sa.performance>=sb.performance?'A':'B','Higher is better'],['Range / mileage',sa.range.toFixed(1),sb.range.toFixed(1),sa.range>=sb.range?'A':'B','Higher is better'],['Charging',sa.charging.toFixed(1),sb.charging.toFixed(1),sa.charging>=sb.charging?'A':'B','Higher is better'],['Safety hardware',sa.safety.toFixed(1),sb.safety.toFixed(1),sa.safety>=sb.safety?'A':'B','Higher is better'],['Maintenance',Number.isFinite(a.maintenanceAnnual)?shortMoney(a.maintenanceAnnual)+'/yr':'Not available',Number.isFinite(b.maintenanceAnnual)?shortMoney(b.maintenanceAnnual)+'/yr':'Not available',Number.isFinite(a.maintenanceAnnual)&&Number.isFinite(b.maintenanceAnnual)?(a.maintenanceAnnual<=b.maintenanceAnnual?'A':'B'):'','Lower is better']];$('tableBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}<div class="note">${r[4]}</div></td><td class="${r[3]==='A'?'win':''}">${r[1]}</td><td class="${r[3]==='B'?'win':''}">${r[2]}</td></tr>`).join('')}
+function renderAlternatives(a,b){const chosen=new Set([a.id,b.id]);const base=Math.min(a.price,b.price);const arr=filterBikes().filter(x=>!chosen.has(x.id)).filter(x=>Math.abs(x.price-base)<=Math.max(25000,base*.22)).sort((x,y)=>density(y)-density(x)).slice(0,6);$('alternativeGrid').innerHTML=arr.length?arr.slice(0,3).map(x=>{const extra=x.price-base;return `<div class="alt"><div class="alt-top"><div><h4>${x.brand} ${x.name}</h4><small>${x.variant}</small></div><b>${density(x).toFixed(1)}/₹L</b></div><p>${shortMoney(x.price)} · ${extra<=0?`${shortMoney(Math.abs(extra))} cheaper`: `${shortMoney(extra)} more`} than the cheaper comparison bike.</p></div>`}).join(''):'<div class="empty" style="grid-column:1/-1;padding:10px 0">No nearby alternatives match the active filters.</div>'}
+function naturalVerdict(a,b){
+  const ua=utility(a), ub=utility(b), da=density(a), db=density(b);
+  const cheaper=a.price<=b.price?a:b, other=cheaper===a?b:a;
+  const priceGap=Math.abs(a.price-b.price), utilityGap=Math.abs(ua-ub), valueGap=Math.abs(da-db);
+  const winner=da>=db?a:b, loser=winner===a?b:a;
+  const maintenanceA=Number.isFinite(a.maintenanceAnnual), maintenanceB=Number.isFinite(b.maintenanceAnnual);
+  const maintenanceSentence=maintenanceA&&maintenanceB?` Routine maintenance is estimated at ${shortMoney(a.maintenanceAnnual)} per year for ${a.name} and ${shortMoney(b.maintenanceAnnual)} for ${b.name}.`: maintenanceA||maintenanceB?' One bike has a usable maintenance-cost estimate; the other does not, so that part of the comparison is intentionally conservative.':'';
+  const winnerIsCheaper=winner.price<=loser.price;
+  const nearTie=valueGap<2.5;
+  const smallUpgrade=priceGap>0 && priceGap<=Math.max(25000,cheaper.price*.18) && utilityGap>=5;
+  const bigPremium=priceGap>Math.max(50000,cheaper.price*.35);
+  let title,text,box,cls='good';
+
+  if(nearTie){
+    title='This is a close call.';
+    text=`${winner.brand} ${winner.name} has a small value advantage, but the difference is not large enough to call it a clear winner. In practical terms, your choice should come down to which bike suits your needs better.${maintenanceSentence}`;
+    box=`Spend less and choose ${cheaper.brand} ${cheaper.name}. Choose ${other.brand} ${other.name} only if its extra performance, range, equipment or comfort matters to you.`;
+  } else if(smallUpgrade && !winnerIsCheaper){
+    const perL=(utilityGap/(priceGap/100000)).toFixed(1);
+    title=`The more expensive bike is the interesting upgrade.`;
+    text=`${winner.brand} ${winner.name} costs ${money(priceGap)} more, but the extra money buys a noticeable improvement in the things you told FairBike to prioritize.${maintenanceSentence}`;
+    box=`You are spending about ${money(priceGap)} more for roughly ${utilityGap.toFixed(1)} extra utility points, or ${perL} points for each extra ₹1 lakh. That is a sensible upgrade rather than simply paying more for a premium badge.`;
+  } else if(winnerIsCheaper){
+    title=`${winner.brand} ${winner.name} is the better buy.`;
+    const save=loser.price-winner.price;
+    text=`It gives you the stronger value for money while also costing ${money(save)} less than ${loser.brand} ${loser.name}. The more expensive bike does not add enough measurable utility to justify its price under your current priorities.${maintenanceSentence}`;
+    box=`Pick ${winner.brand} ${winner.name} when you want the most from your budget. Pay extra for ${loser.brand} ${loser.name} only if it has a feature or riding character that the score does not capture.`;
+  } else if(bigPremium){
+    title=`${winner.brand} ${winner.name} is better, but the premium is substantial.`;
+    text=`It scores higher for your priorities, but it also costs ${money(priceGap)} more. FairBike therefore sees it as a stronger motorcycle, not automatically a stronger purchase.${maintenanceSentence}`;
+    box=`For a tighter budget, ${loser.brand} ${loser.name} remains the sensible choice. Buy the upgrade only when you know you will actually use the extra capability.`;
+  } else {
+    title=`${winner.brand} ${winner.name} wins on value.`;
+    text=`It gives you more useful capability for the money under your current priorities. ${loser.brand} ${loser.name} may still be better in individual areas, but its overall price-to-utility balance is weaker.${maintenanceSentence}`;
+    box=`The important question is not “Which bike is better?” It is “Which bike gives me enough of what I need without paying for capability I will rarely use?”`;
+  }
+  return {title,text,box,cls};
+}
+function renderInsights(a,b){
+  const v=naturalVerdict(a,b),ca=completeness(a),cb=completeness(b),avg=Math.round((ca+cb)/2);
+  $('suggestionTitle').textContent=v.title;
+  $('suggestionText').textContent=v.text;
+  $('suggestionBox').textContent=v.box;
+  $('suggestionBox').className='callout '+v.cls;
+  $('confidenceTitle').textContent=`${avg}% data coverage across the pair`;
+  $('contextText').textContent=`A: ${ca}% · B: ${cb}%. Missing fields are given neutral defaults rather than invented numbers. Older rows are labeled as historical baselines.`;
+  const cbx=$('confidenceBox');
+  cbx.textContent=avg>=85?'Strong coverage. The comparison is relatively well supported by the available measurements.':avg>=65?'Usable coverage, but check the lower-confidence fields before treating small score differences as meaningful.':'Low coverage. Treat the ranking as directional until more source data is added.';
+  cbx.className='callout '+(avg>=85?'good':'warn');
+}
+function renderCatalogMeta(){const visible=filterBikes().length;$('catalogCount').textContent=`${visible.toLocaleString('en-IN')} visible · ${bikes.length.toLocaleString('en-IN')} total`}
+function renderFast(){const a=bikes.find(x=>x.id===state.A),b=bikes.find(x=>x.id===state.B);if(!a||!b)return;$('weights').querySelectorAll('input').forEach(i=>i.value=weights[i.dataset.k]);renderWeights();renderCore(a,b);}
+function renderCore(a,b){$('bikes').innerHTML=card(a,'A',b)+card(b,'B',a);$('thA').textContent=a.name;$('thB').textContent=b.name;renderTable(a,b);renderAlternatives(a,b);renderInsights(a,b);$('sourceList').innerHTML=`<strong style="color:#bcd0da">Sources:</strong> ${(Array.from(new Map([...(a.sources||[]),...(b.sources||[])].map(x=>[x[1],x])).values()).map(s=>`<a href="${s[1]}" target="_blank" rel="noreferrer">${s[0]} ↗</a>`).join(' · '))}`;renderCatalogMeta();$('bikeA').value=`${a.brand} ${a.name} · ${a.variant}`;$('bikeB').value=`${b.brand} ${b.name} · ${b.variant}`;$('bikeAHint').textContent=`${shortMoney(a.price)} · ${completeness(a)}% data`; $('bikeBHint').textContent=`${shortMoney(b.price)} · ${completeness(b)}% data`}
+function render(){normalizeWeights();fillDatalist();const a=bikes.find(x=>x.id===state.A),b=bikes.find(x=>x.id===state.B);if(!a){state.A=filterBikes()[0]?.id}if(!b||state.B===state.A){state.B=filterBikes().find(x=>x.id!==state.A)?.id}const aa=bikes.find(x=>x.id===state.A),bb=bikes.find(x=>x.id===state.B);if(aa&&bb)renderCore(aa,bb);renderWeights()}
+function loadFromUrl(){const p=new URLSearchParams(location.search);state.A=p.get('a')||null;state.B=p.get('b')||null;const w=p.get('w');if(w){const nums=w.split(',').map(Number);if(nums.length===5&&nums.every(Number.isFinite)){weights={performance:nums[0],range:nums[1],charging:nums[2],safety:nums[3],maintenance:nums[4]}}}}
+function shareUrl(){const u=new URL(location.href);u.search='';u.searchParams.set('a',state.A);u.searchParams.set('b',state.B);u.searchParams.set('w',[weights.performance,weights.range,weights.charging,weights.safety,weights.maintenance].join(','));return u.toString()}
+async function copyVerdict(){const a=bikes.find(x=>x.id===state.A),b=bikes.find(x=>x.id===state.B);if(!a||!b)return;const v=naturalVerdict(a,b);const text=`FairBike verdict: ${v.title}
+
+${v.text}
+
+${v.box}
+
+${shareUrl()}`;try{await navigator.clipboard.writeText(text);toast('Natural-language verdict copied')}catch{toast('Copy unavailable in this browser')}}
+async function loadCatalog(){loadFromUrl();
+  const offline=location.protocol==='file:';
+  if(offline){
+    curated.forEach(b=>bikes.push(b));
+    $('catalogStatus').innerHTML='<b>Offline mode.</b> The standalone file is running without a web server. Core comparison, scoring and CSV import work normally; live catalogue/image lookups are enabled automatically on GitHub Pages or a local VS Code server.';
+  }else{
+    try{const res=await fetch(CATALOG_URL,{mode:'cors'});if(!res.ok)throw new Error(res.status);const rows=csvRows(await res.text()),h=rows.shift().map(norm);for(let i=0;i<rows.length;i++){const b=rowToBike(rows[i],h,i);if(b)bikes.push(b)}mergeCurated();$('catalogStatus').innerHTML=`<b>${bikes.length.toLocaleString('en-IN')}</b> bikes / scooters loaded. The catalogue is intentionally broad: current verified models appear first, while older records stay searchable and are clearly labelled. <a href="${CATALOG_PAGE}" target="_blank" rel="noreferrer">catalog source ↗</a>`}catch(e){curated.forEach(b=>bikes.push(b));$('catalogStatus').innerHTML='<b>Local fallback catalogue active.</b> The broad remote catalogue could not be reached. The current verified models remain available; import a CSV to restore full catalogue breadth.'}
+  }
+  state.A||=(bikes[0]?.id);state.B||=(bikes.find(x=>x.id!==state.A)?.id);if(!bikes.find(x=>x.id===state.A))state.A=bikes[0]?.id;if(!bikes.find(x=>x.id===state.B)||state.A===state.B)state.B=bikes.find(x=>x.id!==state.A)?.id;fillDatalist();render();
+}
+async function importCatalogFile(file){try{const rows=csvRows(await file.text()),h=rows.shift().map(norm),imported=[];rows.forEach((r,i)=>{const b=rowToBike(r,h,i);if(b)imported.push(b)});if(!imported.length)throw new Error('No compatible rows');imported.forEach(b=>{b.stale=false;b.fresh='user import';b.verified='user import';b.sources=[['Imported CSV',file.name]]});bikes.splice(0,bikes.length,...imported,...curated.filter(c=>!imported.some(b=>b.brand.toLowerCase()===c.brand.toLowerCase()&&b.name.toLowerCase()===c.name.toLowerCase())));state.A=bikes[0]?.id;state.B=bikes.find(x=>x.id!==state.A)?.id;$('catalogStatus').innerHTML=`<b>${bikes.length.toLocaleString('en-IN')}</b> records loaded from ${file.name}. Verify imported prices and source freshness before buying.`;render();toast('Catalog imported')}catch(e){toast('CSV import failed: '+e.message)}}
+setupBikeInput('A');setupBikeInput('B');
+$('globalSearch').oninput=e=>{state.search=e.target.value;render()};$('budget').onchange=e=>{state.budget=+e.target.value;render()};$('category').onchange=e=>{state.category=e.target.value;render()};$('sort').onchange=e=>{state.sort=e.target.value;render()};$('freshness').onchange=e=>{state.freshness=e.target.value;render()};
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');state.filter=c.dataset.filter;render()});
+$('swapBtn').onclick=()=>{[state.A,state.B]=[state.B,state.A];render();toast('Bikes swapped')};$('copyBtn').onclick=copyVerdict;
+$('shareBtn').onclick=()=>{$('shareUrl').value=shareUrl();$('shareModal').classList.add('open')};$('closeShare').onclick=()=>$('shareModal').classList.remove('open');$('shareUrl').onclick=e=>e.target.select();$('saveWeights').onclick=()=>{localStorage.setItem('fairbike.weights',JSON.stringify(weights));toast('Priorities saved on this device')};
+$('resetBtn').onclick=()=>{localStorage.removeItem('fairbike.weights');location.href=location.pathname};$('importBtn').onclick=()=>$('catalogFile').click();$('catalogFile').onchange=e=>{if(e.target.files?.[0])importCatalogFile(e.target.files[0])};document.addEventListener('click',e=>{const b=e.target.closest('[data-img-retry]');if(!b)return;const bike=bikes.find(x=>x.id===b.dataset.imgRetry),img=$('img'+b.dataset.side);if(bike&&img){imgCache.delete(bike.id);imageFor(bike,img,true).then(()=>toast(imgMeta.get(bike.id)?.source==='FairBike fallback'?'No verified image found':'Image refreshed'))}});
+loadCatalog();
+</script>
+</body>
+</html>
